@@ -68,11 +68,14 @@ class ALICropAndScale(object):
 
 def get_data(args, train_flag=True):
     transform = transforms.Compose([
-        transforms.Scale(args.image_size),
+        transforms.Resize(args.image_size),
         transforms.CenterCrop(args.image_size),
         transforms.ToTensor(),
+        #transforms.Normalize(
+        #    (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        # The following change is for MNIST only (for 1 channel datasets)
         transforms.Normalize(
-            (0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            (0.5,), (0.5,)),
     ])
 
     if args.dataset in ['imagenet', 'folder', 'lfw']:

@@ -121,8 +121,11 @@ sigma_list = [1, 2, 4, 8, 16]
 sigma_list = [sigma / base for sigma in sigma_list]
 
 # put variable into cuda device
-fixed_noise = torch.cuda.FloatTensor(64, args.nz, 1, 1).normal_(0, 1)
-one = torch.cuda.FloatTensor([1])
+#fixed_noise = torch.cuda.FloatTensor(64, args.nz, 1, 1).normal_(0, 1)
+fixed_noise = torch.rand(64, args.nz, 1, 1).normal_(0, 1).to("cuda" if torch.cuda.is_available() else "cpu")
+#one = torch.cuda.FloatTensor([1])
+#one = torch.ones(1).to("cuda" if torch.cuda.is_available() else "cpu")
+one = torch.tensor(1, dtype=torch.float).to("cuda")
 mone = one * -1
 if args.cuda:
     netG.cuda()
@@ -168,7 +171,8 @@ for t in range(args.max_iter):
             for p in netD.encoder.parameters():
                 p.data.clamp_(-0.01, 0.01)
 
-            data = data_iter.next()
+            #data = data_iter.next()
+            data = next(data_iter)
             i += 1
             netD.zero_grad()
 
@@ -178,8 +182,11 @@ for t in range(args.max_iter):
 
             f_enc_X_D, f_dec_X_D = netD(x)
 
-            noise = torch.cuda.FloatTensor(batch_size, args.nz, 1, 1).normal_(0, 1)
-            noise = Variable(noise, volatile=True)  # total freeze netG
+            #noise = torch.cuda.FloatTensor(batch_size, args.nz, 1, 1).normal_(0, 1)
+            noise = torch.rand(batch_size, args.nz, 1, 1).normal_(0, 1).to("cuda")
+            #noise = Variable(noise, volatile=True)  # total freeze netG
+            with torch.no_grad():
+                noise = noise  # total freeze netG
             y = Variable(netG(noise).data)
 
             f_enc_Y_D, f_dec_Y_D = netD(y)
@@ -211,7 +218,7 @@ for t in range(args.max_iter):
             if i == len(trn_loader):
                 break
 
-            data = data_iter.next()
+            data = next(data_iter)
             i += 1
             netG.zero_grad()
 
@@ -221,7 +228,8 @@ for t in range(args.max_iter):
 
             f_enc_X, f_dec_X = netD(x)
 
-            noise = torch.cuda.FloatTensor(batch_size, args.nz, 1, 1).normal_(0, 1)
+            #noise = torch.cuda.FloatTensor(batch_size, args.nz, 1, 1).normal_(0, 1)
+            noise = torch.rand(batch_size, args.nz, 1, 1).normal_(0, 1).to("cuda")
             noise = Variable(noise)
             y = netG(noise)
 
@@ -241,12 +249,13 @@ for t in range(args.max_iter):
             gen_iterations += 1
 
         run_time = (timeit.default_timer() - time) / 60.0
+        #print(mmd2_D, type(mmd2_D), mmd2_D.shape, mmd2_D.item(), mmd2_D.data)
         print('[%3d/%3d][%3d/%3d] [%5d] (%.2f m) MMD2_D %.6f hinge %.6f L2_AE_X %.6f L2_AE_Y %.6f loss_D %.6f Loss_G %.6f f_X %.6f f_Y %.6f |gD| %.4f |gG| %.4f'
               % (t, args.max_iter, i, len(trn_loader), gen_iterations, run_time,
-                 mmd2_D.data[0], one_side_errD.data[0],
-                 L2_AE_X_D.data[0], L2_AE_Y_D.data[0],
-                 errD.data[0], errG.data[0],
-                 f_enc_X_D.mean().data[0], f_enc_Y_D.mean().data[0],
+                 mmd2_D.data, one_side_errD.data,
+                 L2_AE_X_D.data, L2_AE_Y_D.data,
+                 errD.data, errG.data,
+                 f_enc_X_D.mean().data, f_enc_Y_D.mean().data,
                  base_module.grad_norm(netD), base_module.grad_norm(netG)))
 
         if gen_iterations % 500 == 0:
