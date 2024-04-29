@@ -117,7 +117,7 @@ one_sided.apply(base_module.weights_init)
 
 # sigma for MMD
 base = 1.0
-sigma_list = [1, 2, 4, 8, 16]
+sigma_list = [2, 4, 8, 16, 32]
 sigma_list = [sigma / base for sigma in sigma_list]
 
 # put variable into cuda device

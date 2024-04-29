@@ -3,7 +3,7 @@
 
 
 import torch
-
+#torch.set_printoptions(profile="full")
 min_var_est = 1e-8
 
 
@@ -50,10 +50,17 @@ def _mix_rbf_kernel(X, Y, sigma_list):
     diag_ZZT = torch.diag(ZZT).unsqueeze(1)
     Z_norm_sqr = diag_ZZT.expand_as(ZZT)
     exponent = Z_norm_sqr - 2 * ZZT + Z_norm_sqr.t()
+    #print(exponent)
+    # this row below is to use only Euclidian distance, not the square root of the Euclidian. this is needed for L2 Laplacian kernel
+    #exponent = torch.sqrt(exponent)
+    #print(exponent)
 
     K = 0.0
     for sigma in sigma_list:
+        # the line below is the original way - using Gaussian kernel
         gamma = 1.0 / (2 * sigma**2)
+        # the one written below is for the Laplacian kernel using L2 norm
+        # gamma = 1.0 / (sigma)
         K += torch.exp(-gamma * exponent)
 
     return K[:m, :m], K[:m, m:], K[m:, m:], len(sigma_list)
