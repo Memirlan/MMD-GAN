@@ -1,4 +1,4 @@
-## These first 3 lines are by me: Temirlan Kaiyrbekov. I do not owe the right to the MMD GAN code. I only used it for my graduation project.
+## These first 3 lines are by me: Temirlan Kaiyrbekov. Here I reworked the original MMD GAN code. I used it as part of my graduation project.
 ## I have done some work with the code, and the results may be found here: https://drive.google.com/drive/folders/1YB3h_BZHSiqFWHJz49Uq8BOvzfDOqJBU?usp=sharing
 ## The below is from the original MMD GAN repo: https://github.com/OctoberChang/MMD-GAN 
 
